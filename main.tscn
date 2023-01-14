@@ -1,0 +1,178 @@
+[gd_scene load_steps=8 format=3 uid="uid://b1byd0m6kau8g"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_el052"]
+[ext_resource type="Shader" path="res://Palette.gdshader" id="2_bpewp"]
+
+[sub_resource type="GDScript" id="GDScript_6cst5"]
+script/source = "extends LineEdit
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	set_text(SettingsManager.settings.get(\"last_file_location\", \"\"))
+	pass # Replace with function body.
+
+func set_text(text:String):
+	self.text = text
+	caret_column = text.length()
+	pass
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+"
+
+[sub_resource type="GDScript" id="GDScript_b7g2f"]
+script/source = "extends Button
+
+
+
+func _on_pressed():
+	var path = get_parent().get_node(\"HBoxContainer/LineEdit\").text
+	Rom.load_rom(path)
+	
+	var palette_data = Rom.Data.slice(0x0C7DE8, 0x0C7FE8)
+	var graphics_data = Rom.Data.slice(0x0C7FE8, 0x0CBFE8)
+	var tiles_count = graphics_data.size() / (8 * 8)
+	var tiles:Array[Image]
+	
+	for i in tiles_count:
+		var tile = graphics_data.slice(i * 64, (i + 1) * 64)
+		var tile_image = Image.create_from_data(8, 8, false, Image.FORMAT_L8, tile)
+		tiles.append(tile_image)
+	
+	var palette:Array = []
+	for i in 512:
+		if i % 2:
+			# we only need every 16 bits
+			continue
+		var gba_col:int = palette_data.decode_u16(i)
+		palette.append(Palette.color_from_555(gba_col))
+		pass
+		
+	for i in palette.size():
+		var rect = get_parent().get_parent().get_node(\"GridContainer\").get_child(i)
+		rect.color = palette[i]
+	
+	
+	
+	var img:Image = Image.create(256, 160, false, Image.FORMAT_L8)
+	for i in tiles.size():
+		var rect:Rect2i = Rect2i(0, 0, 8, 8)
+		var vec = Vector2i((i * 8) % 256, (floor(i / (256.0/8.0)) * 8))
+		img.blit_rect(tiles[i], rect, vec)
+		pass
+		
+	var tex:ImageTexture = ImageTexture.create_from_image(img)
+	var pal_tex:ImageTexture = ImageTexture.create_from_image(Palette.image_from_palette(palette))
+	get_parent().get_parent().get_node(\"ImagePreview\").texture = tex
+	(get_parent().get_parent().get_node(\"ImagePreview\").material as ShaderMaterial).set_shader_parameter(\"palette\", pal_tex)
+	
+	pass # Replace with function body.
+
+
+
+"
+
+[sub_resource type="GDScript" id="GDScript_m0w2y"]
+script/source = "extends GridContainer
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	for i in 256:
+		var rect = ColorRect.new()
+		rect.color = Color(0.0, 0.0, 0.0, 0.5)
+		rect.size_flags_horizontal = SIZE_EXPAND_FILL
+		rect.size_flags_vertical = SIZE_EXPAND_FILL
+		add_child(rect)
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4mhb1"]
+shader = ExtResource("2_bpewp")
+
+[sub_resource type="ImageTexture" id="ImageTexture_0r5ci"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_el052")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 0
+offset_right = 344.0
+offset_bottom = 184.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer"]
+layout_mode = 2
+
+[node name="LineEdit" type="LineEdit" parent="Control/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "File Path to Mother3 Rom..."
+script = SubResource("GDScript_6cst5")
+
+[node name="Button" type="Button" parent="Control/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Select File.."
+
+[node name="Button" type="Button" parent="Control/VBoxContainer"]
+layout_mode = 2
+text = "Open Rom
+"
+script = SubResource("GDScript_b7g2f")
+
+[node name="FileDialog" type="FileDialog" parent="Control"]
+title = "Open a File"
+position = Vector2i(400, 300)
+size = Vector2i(800, 600)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.gba")
+
+[node name="GridContainer" type="GridContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 45.0
+offset_top = 389.0
+offset_right = -865.0
+offset_bottom = -17.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+columns = 16
+script = SubResource("GDScript_m0w2y")
+
+[node name="ImagePreview" type="TextureRect" parent="Control"]
+material = SubResource("ShaderMaterial_4mhb1")
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -646.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = 646.0
+grow_horizontal = 0
+texture = SubResource("ImageTexture_0r5ci")
+
+[connection signal="pressed" from="Control/VBoxContainer/HBoxContainer/Button" to="Control/FileDialog" method="popup"]
+[connection signal="pressed" from="Control/VBoxContainer/Button" to="Control/VBoxContainer/Button" method="_on_pressed"]
+[connection signal="file_selected" from="Control/FileDialog" to="Control/VBoxContainer/HBoxContainer/LineEdit" method="set_text"]
