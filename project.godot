@@ -12,12 +12,12 @@ _global_script_classes=[{
 "base": "Node",
 "class": &"LZ77",
 "language": &"GDScript",
-"path": "res://LZ77.gd"
+"path": "res://System/LZ77.gd"
 }, {
 "base": "Node",
 "class": &"Palette",
 "language": &"GDScript",
-"path": "res://Palette.gd"
+"path": "res://System/Palette.gd"
 }]
 _global_script_class_icons={
 "LZ77": "",
@@ -27,13 +27,13 @@ _global_script_class_icons={
 [application]
 
 config/name="M3Editor"
-config/features=PackedStringArray("4.0", "C#", "Forward Plus")
+config/features=PackedStringArray("4.0", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-Rom="*res://rom.gd"
-SettingsManager="*res://SettingsManager.gd"
+Rom="*res://System/rom.gd"
+SettingsManager="*res://System/SettingsManager.gd"
 
 [display]
 

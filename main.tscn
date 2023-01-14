@@ -1,7 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://b1byd0m6kau8g"]
+[gd_scene load_steps=8 format=3 uid="uid://b1dj8p7l5prvy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_el052"]
-[ext_resource type="Shader" path="res://Palette.gdshader" id="2_bpewp"]
+[ext_resource type="Shader" path="res://System/Palette.gdshader" id="2_b18rl"]
 
 [sub_resource type="GDScript" id="GDScript_6cst5"]
 script/source = "extends LineEdit
@@ -95,7 +95,7 @@ func _process(delta):
 "
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_4mhb1"]
-shader = ExtResource("2_bpewp")
+shader = ExtResource("2_b18rl")
 
 [sub_resource type="ImageTexture" id="ImageTexture_0r5ci"]
 
