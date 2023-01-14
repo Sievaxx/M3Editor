@@ -7,7 +7,8 @@ Made with magic in Godot 4.0
 A **VERY BASIC** mother 3 editor meant for:
 - Graphics, Palettes, Tile data
 - Text editing (Mother 3 Translation v1.3) with Textbox preview
-- Audio editing, tracker and piano roll of Mother 3's songs with live playback + sample replacement
+- Audio editing, tracker and piano roll of Mother 3's songs with live playback + sample replacement  
+
 What this is NOT meant for:
 - Map editing, Database editing, or anything that edits code unrelated to the game's text.
 
